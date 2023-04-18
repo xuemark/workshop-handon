@@ -4,7 +4,7 @@ export AWS_DEFAULT_REGION=ap-northeast-1
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 export AWS_BUCKET=forecast-20230418-${AWS_ACCOUNT_ID}
 export AWS_FORECAST_ROLE=forecast-execrole
-export FORECAST_DATASET_1=eventdata
+export FORECAST_DATASET_1=eventdata1
 # install awscli2
 mkdir temp
 cd temp
