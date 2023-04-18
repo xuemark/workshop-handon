@@ -2,9 +2,9 @@
 # ENV
 export AWS_DEFAULT_REGION=ap-northeast-1
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-export AWS_BUCKET=forecast-20230429-${AWS_ACCOUNT_ID}
+export AWS_BUCKET=forecast-20230421-${AWS_ACCOUNT_ID}
 export AWS_FORECAST_ROLE=forecast-execrole
-export FORECAST_DATASET_1=eventdata9
+export FORECAST_DATASET_1=eventdata5
 # install awscli2
 mkdir temp
 cd temp
@@ -51,7 +51,6 @@ EOF
 aws iam create-role --role-name ${AWS_FORECAST_ROLE} --assume-role-policy-document file://role-trust-policy.json
 aws iam put-role-policy --role-name ${AWS_FORECAST_ROLE} --policy-name policy --policy-document file://role-inline-policy.json
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - create IAM role"
-sleep 10
 # create S3 bucket
 aws s3 mb s3://${AWS_BUCKET}
 # upload dataset
@@ -64,10 +63,20 @@ aws forecast create-dataset-group --dataset-group-name ${FORECAST_DATASET_1} --d
 
 aws forecast create-dataset --dataset-name ${FORECAST_DATASET_1} --domain CUSTOM --dataset-type TARGET_TIME_SERIES --data-frequency 1H \
     --schema 'Attributes=[{AttributeName=item_id,AttributeType=string},{AttributeName=timestamp,AttributeType=timestamp},{AttributeName=target_value,AttributeType=float}]'
+
 aws forecast update-dataset-group --dataset-group-arn arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset-group/${FORECAST_DATASET_1} --dataset-arns arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset/${FORECAST_DATASET_1}
+cat <<EOF > s3config.json
+{
+    "S3Config": {
+        "Path": "s3://${AWS_BUCKET}/NYC_Taxi_TimeSeriesDataset.csv",
+        "RoleArn": "arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_FORECAST_ROLE}"
+    }
+}
+EOF
 aws forecast create-dataset-import-job --dataset-import-job-name ${FORECAST_DATASET_1} --timestamp-format 'yyyy-MM-dd HH:mm:ss' \
     --no-use-geolocation-for-time-zone --format CSV \
     --dataset-arn arn:aws:forecast:ap-northeast-1:${AWS_ACCOUNT_ID}:dataset/${FORECAST_DATASET_1} \
+    --data-source file://s3config.json
     --data-source 'S3Config={Path='s3://${AWS_BUCKET}/NYC_Taxi_TimeSeriesDataset.csv',RoleArn='arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_FORECAST_ROLE}'}'
 
 while  [ "$(aws forecast describe-dataset-import-job --dataset-import-job-arn arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset-import-job/${FORECAST_DATASET_1}/${FORECAST_DATASET_1}  --query Status --output text)" != "ACTIVE" ];
