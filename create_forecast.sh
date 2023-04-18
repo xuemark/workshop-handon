@@ -2,9 +2,9 @@
 # ENV
 export AWS_DEFAULT_REGION=ap-northeast-1
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-export AWS_BUCKET=forecast-20230418-${AWS_ACCOUNT_ID}
+export AWS_BUCKET=forecast-20230421-${AWS_ACCOUNT_ID}
 export AWS_FORECAST_ROLE=forecast-execrole
-export FORECAST_DATASET_1=eventdata1
+export FORECAST_DATASET_1=eventdata5
 # install awscli2
 mkdir temp
 cd temp
@@ -60,18 +60,23 @@ echo "[`date +%Y/%m/%d-%H:%M:%S`] - upload dataset to s3"
 # create Dataset
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - Start Tasks - ${FORECAST_DATASET_1}"
 aws forecast create-dataset-group --dataset-group-name ${FORECAST_DATASET_1} --domain CUSTOM
+
 aws forecast create-dataset --dataset-name ${FORECAST_DATASET_1} --domain CUSTOM --dataset-type TARGET_TIME_SERIES --data-frequency 1H \
     --schema 'Attributes=[{AttributeName=item_id,AttributeType=string},{AttributeName=timestamp,AttributeType=timestamp},{AttributeName=target_value,AttributeType=float}]'
+
 aws forecast update-dataset-group --dataset-group-arn arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset-group/${FORECAST_DATASET_1} --dataset-arns arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset/${FORECAST_DATASET_1}
+
 aws forecast create-dataset-import-job --dataset-import-job-name ${FORECAST_DATASET_1} --timestamp-format 'yyyy-MM-dd HH:mm:ss' \
     --no-use-geolocation-for-time-zone --format CSV \
     --dataset-arn arn:aws:forecast:ap-northeast-1:${AWS_ACCOUNT_ID}:dataset/${FORECAST_DATASET_1} \
     --data-source 'S3Config={Path='s3://${AWS_BUCKET}/NYC_Taxi_TimeSeriesDataset.csv',RoleArn='arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_FORECAST_ROLE}'}'
+
 while  [ "$(aws forecast describe-dataset-import-job --dataset-import-job-arn arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset-import-job/${FORECAST_DATASET_1}/${FORECAST_DATASET_1}  --query Status --output text)" != "ACTIVE" ];
 do
     echo "[`date +%Y/%m/%d-%H:%M:%S`] - $(aws forecast describe-dataset-import-job --dataset-import-job-arn arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset-import-job/${FORECAST_DATASET_1}/${FORECAST_DATASET_1}  --query Status --output text)";
     sleep 10;
 done
+
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - Dataset Import Job Completed"
 # create auto predictor
 cat <<EOF > data-config.json
