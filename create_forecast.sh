@@ -2,9 +2,18 @@
 # ENV
 export AWS_DEFAULT_REGION=ap-northeast-1
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
-export AWS_BUCKET=forecast-20230416-${AWS_ACCOUNT_ID}
+export AWS_BUCKET=forecast-20230418-${AWS_ACCOUNT_ID}
 export AWS_FORECAST_ROLE=forecast-execrole
 export FORECAST_DATASET_1=eventdata
+# install awscli2
+mkdir temp
+cd temp
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+./aws/install
+rm -rf /bin/aws
+ln -s /usr/local/bin/aws /bin/aws
+echo "[`date +%Y/%m/%d-%H:%M:%S`] - install awscli2"
 # create Forecast exec role
 cat <<EOF > role-inline-policy.json
 {
@@ -41,6 +50,13 @@ cat <<EOF > role-trust-policy.json
 EOF
 aws iam create-role --role-name ${AWS_FORECAST_ROLE} --assume-role-policy-document file://role-trust-policy.json
 aws iam put-role-policy --role-name ${AWS_FORECAST_ROLE} --policy-name policy --policy-document file://role-inline-policy.json
+echo "[`date +%Y/%m/%d-%H:%M:%S`] - create IAM role"
+# create S3 bucket
+aws s3 mb s3://${AWS_BUCKET}
+# upload dataset
+wget https://static.us-east-1.prod.workshops.aws/public/bbb9acaf-724c-43c7-ac07-f0aa6a1e468b/static/attachments/Lab1/NYC_Taxi_TimeSeriesDataset.csv
+aws s3 cp NYC_Taxi_TimeSeriesDataset.csv s3://${AWS_BUCKET}/
+echo "[`date +%Y/%m/%d-%H:%M:%S`] - upload dataset to s3"
 # create Dataset
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - Start Tasks - ${FORECAST_DATASET_1}"
 aws forecast create-dataset-group --dataset-group-name ${FORECAST_DATASET_1} --domain CUSTOM
