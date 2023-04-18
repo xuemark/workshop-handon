@@ -4,7 +4,7 @@ export AWS_DEFAULT_REGION=ap-northeast-1
 export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query "Account" --output text)
 export AWS_BUCKET=forecast-20230416-${AWS_ACCOUNT_ID}
 export AWS_FORECAST_ROLE=forecast-execrole
-export FORECAST_DATASET_1=testdata
+export FORECAST_DATASET_1=eventdata
 # create Forecast exec role
 cat <<EOF > role-inline-policy.json
 {
