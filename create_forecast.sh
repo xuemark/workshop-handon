@@ -69,7 +69,7 @@ aws forecast create-dataset --dataset-name ${FORECAST_DATASET_1} --domain CUSTOM
 aws forecast update-dataset-group --dataset-group-arn arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset-group/${FORECAST_DATASET_1} --dataset-arns arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset/${FORECAST_DATASET_1}
 aws forecast create-dataset-import-job --dataset-import-job-name ${FORECAST_DATASET_1} --timestamp-format 'yyyy-MM-dd HH:mm:ss' \
     --no-use-geolocation-for-time-zone --format CSV \
-    --dataset-arn arn:aws:forecast:ap-northeast-1:${AWS_ACCOUNT_ID}:dataset/${FORECAST_DATASET_1} \
+    --dataset-arn arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset/${FORECAST_DATASET_1} \
     --data-source 'S3Config={Path='s3://${AWS_BUCKET}/NYC_Taxi_TimeSeriesDataset.csv',RoleArn='arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_FORECAST_ROLE}'}'
 
 while  [ "$(aws forecast describe-dataset-import-job --dataset-import-job-arn arn:aws:forecast:${AWS_DEFAULT_REGION}:${AWS_ACCOUNT_ID}:dataset-import-job/${FORECAST_DATASET_1}/${FORECAST_DATASET_1}  --query Status --output text)" != "ACTIVE" ];

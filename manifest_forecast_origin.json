@@ -1,8 +1,8 @@
 {
     "fileLocations": [
         {
-            "URIPrefixes": [
-                "s3://forecast-20230430-421194120268/export/"
+            "URIs": [
+                "s3://forecast-20230430-421194120268/NYC_Taxi_TimeSeriesDataset.csv"
             ]
         }
     ]
