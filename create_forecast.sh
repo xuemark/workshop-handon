@@ -57,7 +57,8 @@ sleep 10
 # create S3 bucket
 aws s3 mb s3://${AWS_BUCKET}
 # upload dataset
-wget https://static.us-east-1.prod.workshops.aws/public/bbb9acaf-724c-43c7-ac07-f0aa6a1e468b/static/attachments/Lab1/NYC_Taxi_TimeSeriesDataset.csv
+# wget https://static.us-east-1.prod.workshops.aws/public/bbb9acaf-724c-43c7-ac07-f0aa6a1e468b/static/attachments/Lab1/NYC_Taxi_TimeSeriesDataset.csv
+wget https://raw.githubusercontent.com/xuemark/workshop-handon/master/NYC_Taxi_TimeSeriesDataset.csv
 aws s3 cp NYC_Taxi_TimeSeriesDataset.csv s3://${AWS_BUCKET}/
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - upload dataset to s3"
 # create Dataset
