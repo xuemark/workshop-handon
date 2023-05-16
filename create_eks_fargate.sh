@@ -33,7 +33,7 @@ echo "[`date +%Y/%m/%d-%H:%M:%S`] - install eksctl"
 # install kubectl
 curl -O https://s3.us-west-2.amazonaws.com/amazon-eks/1.26.2/2023-03-17/bin/linux/amd64/kubectl
 chmod +x ./kubectl
-mv ./kubectl /usr/local/bin
+mv ./kubectl /usr/bin
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - install kubectl"
 
 # create Fargate IAM Role
@@ -122,6 +122,11 @@ echo "[`date +%Y/%m/%d-%H:%M:%S`] - create EKS Fargate Cluster"
 # create OIDC Provider
 eksctl utils associate-iam-oidc-provider --cluster=${AWS_EKS_CLUSTER_NAME} --approve
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - create OIDC Provider"
+
+
+# update kubeconfig
+aws eks update-kubeconfig --name ${AWS_EKS_CLUSTER_NAME}
+echo "[`date +%Y/%m/%d-%H:%M:%S`] - update kubeconfig"
 
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - init completed"
 
