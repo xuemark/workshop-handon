@@ -4,6 +4,16 @@
 yum install -y jq
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - install jq"
 
+# install docker
+yum install -y docker
+systemctl start docker
+echo "[`date +%Y/%m/%d-%H:%M:%S`] - install docker"
+
+# install helm
+curl -sSL https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
+mv /usr/local/bin/helm /usr/bin/helm
+echo "[`date +%Y/%m/%d-%H:%M:%S`] - install helm"
+
 # ENV
 # export AWS_DEFAULT_REGION=ap-northeast-1
 export AWS_DEFAULT_REGION=$(curl http://169.254.169.254/latest/dynamic/instance-identity/document -s| jq -r ".region")
@@ -116,6 +126,7 @@ fargateProfiles:
 EOF
 
 eksctl create cluster -f eks_cluster.yml
+eksctl create fargateprofile -f eks_cluster.yml
 
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - create EKS Fargate Cluster"
 
