@@ -102,15 +102,15 @@ cloudWatch:
       logRetentionInDays: 30
 fargateProfiles:
     - name: default
-      podExecutionRoleARN: arn:aws:iam::${AWS_ACCOUNT_ID}:role/EKSFargatePodExecRole
+      podExecutionRoleARN: arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_FARGATE_ROLE}
       selectors:
       - namespace: default
     - name: kube-system
-      podExecutionRoleARN: arn:aws:iam::${AWS_ACCOUNT_ID}:role/EKSFargatePodExecRole
+      podExecutionRoleARN: arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_FARGATE_ROLE}
       selectors:
       - namespace: kube-system
     - name: fargate-container-insights
-      podExecutionRoleARN: arn:aws:iam::${AWS_ACCOUNT_ID}:role/EKSFargatePodExecRole
+      podExecutionRoleARN: arn:aws:iam::${AWS_ACCOUNT_ID}:role/${AWS_FARGATE_ROLE}
       selectors:
       - namespace: fargate-container-insights
 EOF
@@ -127,6 +127,10 @@ echo "[`date +%Y/%m/%d-%H:%M:%S`] - create OIDC Provider"
 # update kubeconfig
 aws eks update-kubeconfig --name ${AWS_EKS_CLUSTER_NAME}
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - update kubeconfig"
+
+# create awsauth
+eksctl create iamidentitymapping --cluster ${AWS_EKS_CLUSTER_NAME} --arn arn:aws:iam::${AWS_ACCOUNT_ID}:role/TeamRole --group system:masters --username admin
+echo "[`date +%Y/%m/%d-%H:%M:%S`] - create awsauth"
 
 echo "[`date +%Y/%m/%d-%H:%M:%S`] - init completed"
 
